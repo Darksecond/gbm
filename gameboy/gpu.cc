@@ -26,6 +26,7 @@ void GB::GPU::step(int cycles) {
 				if(current_line == 143) {
 					mode = 1;
 					io.flip();
+					//io.clear(White);
 				} else {
 					mode = 2;
 				}
@@ -51,7 +52,7 @@ void GB::GPU::step(int cycles) {
 			if(clock >= 172) {
 				clock = 0;
 				mode = 0;
-				//TODO render_scan();
+				//render_scan();
 			}
 			break;
 	}
@@ -62,11 +63,21 @@ uint8_t GB::GPU::read8(uint16_t addr) {
 	else if(addr >= 0xFE00 && addr < 0xFEA0) return oam[addr & 0xFF];    //OAM (Object Attribute Memory)
 
 	//else if(addr >= 0xFF00 && addr < 0xFF80); //MMIO
-	if(addr == 0xFF44) { //Current Scan Line Register
+	       if(addr == 0xFF40) {
+		return lcdc;
+	} else if(addr == 0xFF41) {
+		return ((current_line==lyc)?4:0) | (mode & 3);
+	} else if(addr == 0xFF42) {
+		return y_scrl;
+	} else if(addr == 0xFF43) {
+		return x_scrl;
+	} else if(addr == 0xFF44) {
 		return current_line;
+	} else if(addr == 0xFF45) {
+		return lyc;
 	}
 
-	printf("[read] [addr 0x%X]\n",addr);
+	printf("[gpu read] [addr 0x%X]\n",addr);
 	return 0;
 }
 
@@ -76,5 +87,20 @@ void GB::GPU::write8(uint16_t addr, uint8_t value) {
 
 	//else if(addr >= 0xFF00 && addr < 0xFF80); //MMIO
 
+	//if(addr > 0xFEA0)
 	//printf("[write] [addr 0x%X] [val 0x%X]\n",addr, value);
+
+	       if(addr == 0xFF40) {
+		lcdc = value;
+	} else if(addr == 0xFF41) {
+		//TODO interrupt flags, currently not used
+	} else if(addr == 0xFF42) {
+		y_scrl = value;
+	} else if(addr == 0xFF43) {
+		x_scrl = value;
+	} else if(addr == 0xFF45) {
+		lyc = value;
+	}
+
+	if(addr > 0xFF45) printf("[gpu write] [addr 0x%X] [val 0x%X]\n",addr,value);
 }

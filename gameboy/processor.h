@@ -48,6 +48,7 @@ namespace GB {
 		MMU& mmu; //Memory mapper
 
 		bool ime;
+		bool halt;
 
 		inline void push(uint16_t a) {
 			regs.SP -= 2;
@@ -184,6 +185,72 @@ namespace GB {
 			regs.F.H = 0;
 			return a;
 		}
+
+		inline uint8_t inc(uint8_t a) {
+			++a;
+			if((a & 0x0F) == 0)
+				regs.F.H = 1;
+			else
+				regs.F.H = 0;
+			if(a == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			return a;
+		}
+
+		inline uint8_t swap(uint8_t a) {
+			uint8_t tmp = a & 0x0F;
+			a >>= 4;
+			a |= (tmp << 4);
+			if(a == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			regs.F.H = 0;
+			regs.F.C = 0;
+			return a;
+		}
+
+		inline uint8_t ADD(uint8_t a, uint8_t b) {
+			uint8_t tmp = a + b;
+			if(0xFF - a < b)
+				regs.F.C = 1;
+			else
+				regs.F.C = 0;
+			if(0x0F - (a & 0x0F) < (b & 0x0F))
+				regs.F.H = 1;
+			else
+				regs.F.H = 0;
+			if(tmp == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			return tmp;
+		}
+
+		inline uint16_t ADD16(uint16_t a, uint16_t b) {
+			uint16_t tmp = a + b;
+			if(0xFFFF - a < b)
+				regs.F.C = 1;
+			else
+				regs.F.C = 0;
+			if(0x0FFF - (a & 0x0FFF) < (b & 0x0FFF))
+				regs.F.H = 1;
+			else
+				regs.F.H = 0;
+			if(tmp == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			return tmp;
+		}
+
+		int decode();
 	public:
 		Processor(MMU& mmu);
 

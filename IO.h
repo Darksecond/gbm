@@ -20,5 +20,5 @@ public:
 	void destroy();
 	void flip();
 	void set_px(int x, int y, const RGB &color);
-	void clear();
+	void clear(const RGB &color = Black);
 };

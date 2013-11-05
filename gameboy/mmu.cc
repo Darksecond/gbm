@@ -7,9 +7,7 @@ GB::MMU::MMU(Cart& cart, GPU& gpu) : cart(cart), gpu(gpu) {
 
 void GB::MMU::reset() {
 	memset(wram, 0, 8192);
-	memset(zram, 0, 127);
-
-	ie = 0;
+	memset(zram, 0, 128);
 }
 
 uint8_t GB::MMU::read8(uint16_t addr) {
@@ -26,19 +24,18 @@ uint8_t GB::MMU::read8(uint16_t addr) {
 	
 	//else if(addr >= 0xFF00 && addr < 0xFF80); //MMIO (TODO)
 	//START VIDEO REGS
-	else if(addr == 0xFF44) return gpu.read8(addr); //GPU register(s)
+	else if(addr >= 0xFF40 && addr < 0xFF56) return gpu.read8(addr); //GPU register(s)
 	//END VIDEO REGS
 
-	else if(addr >= 0xFF80 && addr < 0xFFFF) return zram[addr & 0x7F];   //Zero ram
-	else if(addr == 0xFFFF) return ie;                                   //Interrupt enable flags
+	else if(addr >= 0xFF80 && addr <= 0xFFFF) return zram[addr & 0x7F];   //Zero ram
 
-	printf("[read addr 0x%X]\n",addr);
+	printf("[mmu read] [addr 0x%X]\n",addr);
 	return 0; //failure state
 }
 
 void GB::MMU::write8(uint16_t addr, uint8_t value) {
 	//TODO More memory things
-
+	
 	     if(addr >= 0x0000 && addr < 0x4000) cart.write8(addr, value);    //Rom, bank 0
 	else if(addr >= 0x4000 && addr < 0x8000) cart.write8(addr, value);    //Rom, bank 1
 	else if(addr >= 0x8000 && addr < 0xA000)  gpu.write8(addr, value);    //VRAM
@@ -48,13 +45,11 @@ void GB::MMU::write8(uint16_t addr, uint8_t value) {
 	else if(addr >= 0xFE00 && addr < 0xFEA0)  gpu.write8(addr, value);    //OAM (Object Attribute Memory)
 	//else if(addr >= 0xFEA0 && addr < 0xFF00); //Unusable
 
-	else if(addr >= 0xFF00 && addr < 0xFF80) printf("[mmu write] [addr 0x%X] [val 0x%X]\n",addr,value); //MMIO
+	//else if(addr >= 0xFF00 && addr < 0xFF80) printf("[mmu write] [addr 0x%X] [val 0x%X]\n",addr,value); //MMIO
 	//START VIDEO REGS
-	else if(addr == 0xFF44) gpu.write8(addr, value); //GPU register(s)
+	else if(addr >= 0xFF40 && addr < 0xFF56) gpu.write8(addr, value); //GPU register(s)
 	//END VIDEO REGS
-
-	else if(addr >= 0xFF80 && addr < 0xFFFF) zram[addr & 0x7F] = value;   //Zero ram
-	else if(addr == 0xFFFF) ie = value;                                   //Interrupt enable flags
+	else if(addr >= 0xFF80 && addr <= 0xFFFF) zram[addr & 0x7F] = value;   //Zero ram
 	
 	//failure state
 }

@@ -7,10 +7,9 @@ namespace GB {
 
 	struct MMU {
 		uint8_t wram[8192]; //Working ram
-		uint8_t zram[127];  //Zero (fast) ram
+		uint8_t zram[128];  //Zero (fast) ram
 		Cart& cart;
 		GPU& gpu;
-		int ie; //Interrupt Enable
 	public:
 		MMU(Cart& cart, GPU& gpu);
 

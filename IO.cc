@@ -34,7 +34,8 @@ void IO::set_px(int x, int y, const RGB &c) {
 	SDL_RenderDrawPoint(ren, x, y);
 }
 
-void IO::clear() {
+void IO::clear(const RGB& c) {
 	if(!ren) return;
+	SDL_SetRenderDrawColor(ren, c.r, c.g, c.b, 255);
 	SDL_RenderClear(ren);
 }

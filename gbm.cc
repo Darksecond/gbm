@@ -8,6 +8,9 @@
 #include <cstdint>
 #include <cassert>
 
+//TODO Make a BusDevice and Bus
+//     With read8,write8,read16,write16
+//     And register_{addr,range}
 namespace GB {
 
 	struct System {
@@ -38,12 +41,12 @@ namespace GB {
 
 int main(int argc, char* argv[]) {
 	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-		fprintf(stderr,"sdl initialisation failed: %s\b", SDL_GetError());
+		fprintf(stderr,"sdl initialization failed: %s\b", SDL_GetError());
 		exit(1);
 	}
 
 	IO io;
-	io.clear();
+	io.clear(White);
 	io.create();
 
 	GB::System system(io);

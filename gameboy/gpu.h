@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../IO.h"
+#include "../util.h"
 #include <cstdint>
 
 namespace GB {
@@ -13,6 +14,22 @@ namespace GB {
 		int clock;
 		int mode;
 		IO &io;
+		int x_scrl, y_scrl;
+		int lyc;
+
+		union {
+			RegBit<7> LCD_ON;
+			//RegBit<6>
+			//RegBit<5>
+			RegBit<4> BG_TILE_BASE;
+			RegBit<3> BG_MAP_BASE;
+			RegBit<2> OBJ_SIZE;
+			RegBit<1> OBJ_ON;
+			RegBit<0> BG_ON;
+			uint8_t lcdc;
+		};
+
+		//void render_scan();
 	public:
 		GPU(IO &io);
 
