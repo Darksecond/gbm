@@ -153,7 +153,8 @@ int GB::Processor::decode() {
 			cycles = 8;
 			break;
 		case 0x18: //JR n
-			jr(mmu.read8(regs.PC++));
+			jr(mmu.read8(regs.PC));
+			++regs.PC;
 			cycles = 12;
 			break;
 		case 0x19: //ADD HL, DE
@@ -182,7 +183,8 @@ int GB::Processor::decode() {
 			break;
 		case 0x20: //JR NZ, n
 			if(regs.F.Z == 0) {
-				jr(mmu.read8(regs.PC++));
+				jr(mmu.read8(regs.PC));
+				++regs.PC;
 				cycles = 12;
 			} else {
 				++regs.PC;
@@ -204,7 +206,8 @@ int GB::Processor::decode() {
 			break;
 		case 0x28: //JR Z, n
 			if(regs.F.Z != 0) {
-				jr(mmu.read8(regs.PC++));
+				jr(mmu.read8(regs.PC));
+				++regs.PC;
 				cycles = 12;
 			} else {
 				++regs.PC;
@@ -240,7 +243,8 @@ int GB::Processor::decode() {
 			break;
 		case 0x38: //JR C, n
 			if(regs.F.C != 0) {
-				jr(mmu.read8(regs.PC++));
+				jr(mmu.read8(regs.PC));
+				++regs.PC;
 				cycles = 12;
 			} else {
 				++regs.PC;

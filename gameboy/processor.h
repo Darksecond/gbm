@@ -125,7 +125,7 @@ namespace GB {
 
 		inline void rst(uint8_t a) {
 			push(regs.PC);
-			regs.PC = 0x0000 + a;
+			regs.PC = a;
 		}
 
 		inline uint8_t AND(uint8_t a, uint8_t b) {

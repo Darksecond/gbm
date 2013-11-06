@@ -13,7 +13,7 @@ void GB::GPU::reset() {
 
 	current_line = 0;
 	clock = 0;
-	mode = 3;
+	mode = 0;
 
 	io.clear(White);
 }
@@ -156,6 +156,19 @@ void GB::GPU::render_line() {
 				}
 				x += 8-offset_x;
 			}
+		} else {
+			//!BG_ON
+			for(int i=0;i<160;++i) {
+				framebuffer[current_line*160+i] = {200,200,200};
+			}
 		}
+	} else {
+		//!LCD_ON
+		if(clock >= 60000) {
+			write_fb();
+			clock -= 60000;
+		}
+		memset(framebuffer, 255, 160*144*sizeof(RGB));
+		current_line = 0;
 	}
 }
