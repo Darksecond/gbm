@@ -9,6 +9,7 @@ namespace GB {
 	struct GPU {
 		uint8_t vram[8192]; //Video ram
 		uint8_t oam[160];   //Object Attribute Memory
+		RGB framebuffer[160*144];
 
 		int current_line;
 		int clock;
@@ -29,7 +30,8 @@ namespace GB {
 			uint8_t lcdc;
 		};
 
-		//void render_scan();
+		void render_line();
+		void write_fb();
 	public:
 		GPU(IO &io);
 

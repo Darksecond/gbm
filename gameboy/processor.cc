@@ -75,9 +75,11 @@ void GB::Processor::print() {
 }
 
 int GB::Processor::step() {
-	if(halt == true) {
+
+	if(halt == true) { //TODO Halt bug?
 		return 20;
 	}
+
 	return decode();
 }
 
@@ -103,6 +105,14 @@ int GB::Processor::decode() {
 			break;
 		case 0x06: //LD B, n
 			regs.B = mmu.read8(regs.PC++);
+			cycles = 8;
+			break;
+		case 0x09: //ADD HL, BC
+			regs.HL = ADD16(regs.HL, regs.BC);
+			cycles = 8;
+			break;
+		case 0x0A: //LD A, (BC)
+			regs.A = mmu.read8(regs.BC);
 			cycles = 8;
 			break;
 		case 0x0B: //DEC BC
@@ -134,6 +144,10 @@ int GB::Processor::decode() {
 			++regs.DE;
 			cycles = 8;
 			break;
+		case 0x15: //DEC D
+			regs.D = dec(regs.D);
+			cycles = 4;
+			break;
 		case 0x16: //LD D, n
 			regs.D = mmu.read8(regs.PC++);
 			cycles = 8;
@@ -157,6 +171,14 @@ int GB::Processor::decode() {
 		case 0x1C: //INC E
 			regs.E = inc(regs.E);
 			cycles = 4;
+			break;
+		case 0x1D: //DEC E
+			regs.E = dec(regs.E);
+			cycles = 4;
+			break;
+		case 0x1E: //LD E, n
+			regs.E = mmu.read8(regs.PC++);
+			cycles = 8;
 			break;
 		case 0x20: //JR NZ, n
 			if(regs.F.Z == 0) {
@@ -233,12 +255,20 @@ int GB::Processor::decode() {
 			regs.A = dec(regs.A);
 			cycles = 4;
 			break;
+		case 0x44: //LD B, H
+			regs.B = regs.H;
+			cycles = 4;
+			break;
 		case 0x47: //LD B, A
 			regs.B = regs.A;
 			cycles = 4;
 			break;
 		case 0x4C: //LD C, H
 			regs.C = regs.H;
+			cycles = 4;
+			break;
+		case 0x4D: //LD C, L
+			regs.C = regs.L;
 			cycles = 4;
 			break;
 		case 0x4F: //LD C, A
@@ -270,7 +300,9 @@ int GB::Processor::decode() {
 			cycles = 8;
 			break;
 		case 0x76: //HALT
-			halt = 1;
+			//TODO Halt bug
+			if(ime)
+				halt = 1;
 			cycles = 4;
 			break;
 		case 0x78: //LD A, B
@@ -299,6 +331,10 @@ int GB::Processor::decode() {
 			break;
 		case 0x87: //ADD A, A
 			regs.A = ADD(regs.A, regs.A);
+			cycles = 4;
+			break;
+		case 0x97: //SUB A, A
+			regs.A = sub(regs.A, regs.A);
 			cycles = 4;
 			break;
 		case 0xA1: //AND C
@@ -340,6 +376,15 @@ int GB::Processor::decode() {
 		case 0xC1: //POP BC
 			regs.BC = pop();
 			cycles = 12;
+			break;
+		case 0xC2: //JP NZ, nn
+			if(regs.F.Z == 0) {
+				regs.PC = mmu.read16(regs.PC);
+				cycles = 16;
+			} else {
+				regs.PC += 2;
+				cycles = 12;
+			}
 			break;
 		case 0xC3: //JP nn
 			regs.PC = mmu.read16(regs.PC);

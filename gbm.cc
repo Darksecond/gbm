@@ -18,12 +18,15 @@ namespace GB {
 		GB::GPU gpu;
 		GB::MMU mmu;
 		GB::Processor proc;
+		uint32_t prev;
+		uint32_t cycle_count;
+		uint32_t clock;
 	public:
 		System(IO &io) : gpu(io), mmu(cart,gpu), proc(mmu) {
+			prev = SDL_GetTicks();
 		}
 
 		bool step() {
-
 			SDL_Event event;
 			while(SDL_PollEvent(&event)) {
 				switch(event.type) {
@@ -32,8 +35,26 @@ namespace GB {
 				}
 			}
 
-			int cycles = proc.step();
-			gpu.step(cycles);
+			int cycles = 0;
+			for(int i=0;i<4000;++i) {
+				int icycles = proc.step();
+				gpu.step(icycles);
+				cycles += icycles;
+				if(icycles == 0) return 0;
+			}
+
+			uint32_t current = SDL_GetTicks();
+			uint32_t delta = current - prev;
+			prev = current;
+
+			cycle_count += cycles;
+			clock += delta;
+			if(clock > 1000) {
+				printf("%fMhz\n",cycle_count/(clock/1000.0)/1000000.0);
+				clock = 0;
+				cycle_count = 0;
+			}
+
 			return cycles > 0;
 		}
 	};
@@ -50,12 +71,13 @@ int main(int argc, char* argv[]) {
 	io.create();
 
 	GB::System system(io);
-	system.cart.load("../tetris.gb"); //ROM ONLY
+	system.cart.load("/Users/darksecond/build/gbm/tetris.gb"); //ROM ONLY
 	//system.cart.load("../zelda.gb"); //ROM+MBC1+RAM+BATT
 	//system.cart.load("../pkmn_blue.gb"); //ROM+MBC3+RAM+BATT
 	//system.cart.load("../pkmn_gold.gbc"); //ROM+MBC3+TIMER+RAM+BATT
 	//system.cart.load("../zelda_dx.gbc"); //ROM+MBC5+RAM+BATT
 	//system.cart.load("../ff_legend.gb"); //ROM+MBC2+BATT
+	//system.cart.load("../opus5.gb");
 	
 	bool running = true;
 	while(running) {

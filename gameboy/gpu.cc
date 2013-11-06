@@ -9,10 +9,25 @@ GB::GPU::GPU(IO &io) : io(io) {
 void GB::GPU::reset() {
 	memset(vram, 0, 8192);
 	memset(oam, 0, 160);
+	memset(framebuffer, 255, 160*144*sizeof(RGB));
 
 	current_line = 0;
 	clock = 0;
-	mode = 0;
+	mode = 3;
+
+	io.clear(White);
+}
+
+void GB::GPU::write_fb() {
+	for(int y=0;y<144;++y) {
+		for(int x=0;x<160;++x) {
+			for(int iy = 0; iy < 4; iy++) {
+				for(int ix = 0; ix < 4; ix++) {
+					io.set_px(x*4+ix,y*4+iy,framebuffer[y*160+x]);
+				}
+			}
+		}
+	}
 }
 
 void GB::GPU::step(int cycles) {
@@ -25,8 +40,9 @@ void GB::GPU::step(int cycles) {
 				++current_line;
 				if(current_line == 143) {
 					mode = 1;
+					io.clear(White);
+					write_fb();
 					io.flip();
-					//io.clear(White);
 				} else {
 					mode = 2;
 				}
@@ -52,7 +68,7 @@ void GB::GPU::step(int cycles) {
 			if(clock >= 172) {
 				clock = 0;
 				mode = 0;
-				//render_scan();
+				render_line();
 			}
 			break;
 	}
@@ -90,7 +106,7 @@ void GB::GPU::write8(uint16_t addr, uint8_t value) {
 	//if(addr > 0xFEA0)
 	//printf("[write] [addr 0x%X] [val 0x%X]\n",addr, value);
 
-	       if(addr == 0xFF40) {
+	if(addr == 0xFF40) {
 		lcdc = value;
 	} else if(addr == 0xFF41) {
 		//TODO interrupt flags, currently not used
@@ -102,5 +118,44 @@ void GB::GPU::write8(uint16_t addr, uint8_t value) {
 		lyc = value;
 	}
 
-	if(addr > 0xFF45) printf("[gpu write] [addr 0x%X] [val 0x%X]\n",addr,value);
+	//TODO more registers
+	//if(addr > 0xFF40) printf("[gpu write] [addr 0x%X] [val 0x%X]\n",addr,value);
+}
+
+void GB::GPU::render_line() {
+	if(LCD_ON) {
+		if(BG_ON) {
+			const int tile_base = BG_TILE_BASE ? 0x0000 : 0x0800;
+			const int map_base = BG_MAP_BASE ? 0x1C00 : 0x1800;
+
+			uint8_t bg_y = (y_scrl + current_line) & 0xFF; //Roll over
+			uint8_t tile_y = bg_y / 8;
+			uint8_t offset_y = bg_y % 8;
+
+			for(int x = x_scrl; x <= x_scrl + 160;) {
+				uint8_t bg_x = x & 0xFF; //Roll over
+				uint8_t tile_x = bg_x / 8;
+				uint8_t offset_x = bg_x % 8;
+
+				uint8_t map = vram[map_base + (tile_y*32) + tile_x];
+				if(BG_TILE_BASE == 0) map ^= 0x80;
+
+				uint8_t *tile = vram + tile_base + (map*16);
+				uint8_t *tile_line = tile + (offset_y*2);
+				for(int i = offset_x;i<8;++i) {
+					uint8_t color = 0;
+					color |= (tile_line[0] & (1 << i)) == (1 << i);
+					color |= (tile_line[1] & (1 << i)) == (1 << i) ? 2 : 0;
+					RGB rgb;
+					if(color == 0) rgb = {200,200,200};
+					if(color == 1) rgb = {127,127,127};
+					if(color == 2) rgb = {96,96,96};
+					if(color == 3) rgb = Black;
+					//printf("[x %i] [y %i]\n",bg_x-x_scrl-i,current_line);
+					framebuffer[(current_line*160)+bg_x-x_scrl-i] = rgb;
+				}
+				x += 8-offset_x;
+			}
+		}
+	}
 }

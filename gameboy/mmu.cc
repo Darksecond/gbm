@@ -29,7 +29,7 @@ uint8_t GB::MMU::read8(uint16_t addr) {
 
 	else if(addr >= 0xFF80 && addr <= 0xFFFF) return zram[addr & 0x7F];   //Zero ram
 
-	printf("[mmu read] [addr 0x%X]\n",addr);
+	//printf("[mmu read] [addr 0x%X]\n",addr);
 	return 0; //failure state
 }
 
