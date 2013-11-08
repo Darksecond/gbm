@@ -1,9 +1,10 @@
 #include "mmu.h"
 #include "cart.h"
 #include "gpu.h"
+#include "input.h"
 #include <cstring>
 
-GB::MMU::MMU(Cart& cart, GPU& gpu) : cart(cart), gpu(gpu) {
+GB::MMU::MMU(Cart& cart, GPU& gpu, Input& input) : cart(cart), gpu(gpu), input(input) {
 	reset();
 }
 
@@ -24,6 +25,7 @@ uint8_t GB::MMU::read8(uint16_t addr) {
 	else if(addr >= 0xE000 && addr < 0xFE00) return wram[addr & 0x1FFF]; //shadow working ram
 	else if(addr >= 0xFE00 && addr < 0xFEA0) return gpu.read8(addr);     //OAM (Object Attribute Memory)
 	else if(addr >= 0xFEA0 && addr < 0xFF00) return 0;                   //Unusable
+	else if(addr == 0xFF00) return input.read8(addr);
 	else if(addr == 0xFF0F) return IF;
 	
 	//else if(addr >= 0xFF00 && addr < 0xFF80); //MMIO (TODO)
@@ -48,6 +50,7 @@ void GB::MMU::write8(uint16_t addr, uint8_t value) {
 	else if(addr >= 0xE000 && addr < 0xFE00) wram[addr & 0x1FFF] = value; //shadow working ram
 	else if(addr >= 0xFE00 && addr < 0xFEA0)  gpu.write8(addr, value);    //OAM (Object Attribute Memory)
 	//else if(addr >= 0xFEA0 && addr < 0xFF00); //Unusable
+	else if(addr == 0xFF00) input.write8(addr, value);
 	else if(addr == 0xFF0F) IF = value;
 
 	//else if(addr >= 0xFF00 && addr < 0xFF80) printf("[mmu write] [addr 0x%X] [val 0x%X]\n",addr,value); //MMIO

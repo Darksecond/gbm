@@ -16,6 +16,8 @@ endif ()
 add_executable (gbm
 	IO.h
 	IO.cc
+	gameboy/input.h
+	gameboy/input.cc
 	gameboy/gpu.h
 	gameboy/gpu.cc
 	gameboy/cart.h

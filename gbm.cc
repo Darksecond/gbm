@@ -2,6 +2,7 @@
 #include "gameboy/mmu.h"
 #include "gameboy/processor.h"
 #include "gameboy/gpu.h"
+#include "gameboy/input.h"
 #include "IO.h"
 #include <SDL.h>
 #include <cstdio>
@@ -18,11 +19,12 @@ namespace GB {
 		GB::GPU gpu;
 		GB::MMU mmu;
 		GB::Processor proc;
+		GB::Input input;
 		uint32_t prev;
 		uint32_t cycle_count;
 		uint32_t clock;
 	public:
-		System(IO &io) : gpu(io,mmu), mmu(cart,gpu), proc(mmu) {
+		System(IO &io) : gpu(io,mmu), mmu(cart,gpu,input), proc(mmu) {
 			prev = SDL_GetTicks();
 		}
 
@@ -37,6 +39,7 @@ namespace GB {
 
 			int cycles = 0;
 			for(int i=0;i<4000;++i) {
+				input.step();
 				int icycles = proc.step();
 				gpu.step(icycles);
 				cycles += icycles;

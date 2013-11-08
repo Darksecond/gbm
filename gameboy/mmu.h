@@ -5,14 +5,16 @@ namespace GB {
 
 	struct Cart;
 	struct GPU;
+	struct Input;
 	struct MMU {
 		uint8_t wram[8192]; //Working ram
 		uint8_t zram[128];  //Zero (fast) ram
 		uint8_t IF;
 		Cart& cart;
 		GPU& gpu;
+		Input& input;
 	public:
-		MMU(Cart& cart, GPU& gpu);
+		MMU(Cart& cart, GPU& gpu, Input& input);
 
 		void reset();
 		uint8_t read8(uint16_t addr);

@@ -449,6 +449,10 @@ int GB::Processor::decode() {
 			regs.A = ADD(regs.A, regs.B);
 			cycles = 4;
 			break;
+		case 0x81: //ADD A, C
+			regs.A = ADD(regs.A, regs.C);
+			cycles = 4;
+			break;
 		case 0x83: //ADD A, E
 			regs.A = ADD(regs.A, regs.E);
 			cycles = 4;
@@ -637,6 +641,10 @@ int GB::Processor::decode() {
 						break;
 					case 0x77: //BIT 6, A
 						bit(regs.A, 6);
+						cycles = 8;
+						break;
+					case 0x7F: //BIT 7, A
+						bit(regs.A, 7);
 						cycles = 8;
 						break;
 					case 0x87: //RES 0,A
