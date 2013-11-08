@@ -67,7 +67,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	IO io;
-	io.clear(White);
 	io.create();
 
 	GB::System system(io);

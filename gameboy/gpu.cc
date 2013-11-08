@@ -14,7 +14,7 @@ void GB::GPU::reset() {
 
 	current_line = 0;
 	clock = 0;
-	mode = 0;
+	mode = 3;
 
 	io.clear(White);
 }

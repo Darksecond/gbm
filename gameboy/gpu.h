@@ -22,8 +22,8 @@ namespace GB {
 
 		union {
 			RegBit<7> LCD_ON;
-			//RegBit<6>
-			//RegBit<5>
+			RegBit<6> WND_MAP_BASE;
+			RegBit<5> WND_ON;
 			RegBit<4> BG_TILE_BASE;
 			RegBit<3> BG_MAP_BASE;
 			RegBit<2> OBJ_SIZE;
