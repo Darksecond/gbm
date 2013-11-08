@@ -1,13 +1,14 @@
 #pragma once
-
-#include "cart.h"
-#include "gpu.h"
+#include <cstdint>
 
 namespace GB {
 
+	struct Cart;
+	struct GPU;
 	struct MMU {
 		uint8_t wram[8192]; //Working ram
 		uint8_t zram[128];  //Zero (fast) ram
+		uint8_t IF;
 		Cart& cart;
 		GPU& gpu;
 	public:

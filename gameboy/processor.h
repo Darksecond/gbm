@@ -250,6 +250,43 @@ namespace GB {
 			return tmp;
 		}
 
+		inline void bit(uint8_t reg, uint8_t b) {
+			if((reg & (1 << b)) == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			regs.F.H = 1;
+
+		}
+
+		inline uint8_t srl(uint8_t a) {
+			regs.F.C = a & 0x01;
+			a >>= 1;
+			if(a == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			regs.F.H = 0;
+			return a;
+		}
+
+		inline uint8_t rr(uint8_t a) {
+			int tmp = regs.F.C;
+			regs.F.C = a & 0x01;
+			a = (a >> 1) + (tmp << 7);
+			if(a == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			regs.F.H = 0;
+			return a;
+		}
+
+		void handle_interrupts();
+		void handle_interrupt(uint8_t interrupt,uint16_t vector,uint8_t IE,uint8_t IF);
 		int decode();
 	public:
 		Processor(MMU& mmu);

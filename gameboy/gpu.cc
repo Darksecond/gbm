@@ -1,8 +1,9 @@
 #include "gpu.h"
+#include "mmu.h"
 #include <cstdio>
 #include <cstring>
 
-GB::GPU::GPU(IO &io) : io(io) {
+GB::GPU::GPU(IO &io, MMU &mmu) : io(io), mmu(mmu) {
 	reset();
 }
 
@@ -43,6 +44,7 @@ void GB::GPU::step(int cycles) {
 					io.clear(White);
 					write_fb();
 					io.flip();
+					mmu.write8(0xFF0F, mmu.read8(0xFF0F) | 0x01); //V-blank int
 				} else {
 					mode = 2;
 				}

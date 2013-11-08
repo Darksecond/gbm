@@ -6,6 +6,7 @@
 
 namespace GB {
 
+	struct MMU;
 	struct GPU {
 		uint8_t vram[8192]; //Video ram
 		uint8_t oam[160];   //Object Attribute Memory
@@ -15,6 +16,7 @@ namespace GB {
 		int clock;
 		int mode;
 		IO &io;
+		MMU &mmu;
 		int x_scrl, y_scrl;
 		int lyc;
 
@@ -33,7 +35,7 @@ namespace GB {
 		void render_line();
 		void write_fb();
 	public:
-		GPU(IO &io);
+		GPU(IO &io, MMU &mmu);
 
 		void reset();
 		void step(int cycles);
