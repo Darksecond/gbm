@@ -172,5 +172,6 @@ void GB::GPU::render_line() {
 		}
 		memset(framebuffer, 255, 160*144*sizeof(RGB));
 		current_line = 0;
+		mode = 1;
 	}
 }

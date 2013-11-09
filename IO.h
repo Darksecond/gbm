@@ -30,4 +30,5 @@ public:
 	void flip();
 	void set_px(int x, int y, const RGB &color);
 	void clear(const RGB &color = Black);
+	void set_title(const char* title);
 };

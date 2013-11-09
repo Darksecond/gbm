@@ -20,11 +20,12 @@ namespace GB {
 		GB::MMU mmu;
 		GB::Processor proc;
 		GB::Input input;
+		IO &io;
 		uint32_t prev;
 		uint32_t cycle_count;
 		uint32_t clock;
 	public:
-		System(IO &io) : gpu(io,mmu), mmu(cart,gpu,input), proc(mmu) {
+		System(IO &io) : io(io), gpu(io,mmu), mmu(cart,gpu,input), proc(mmu) {
 			prev = SDL_GetTicks();
 		}
 
@@ -53,7 +54,9 @@ namespace GB {
 			cycle_count += cycles;
 			clock += delta;
 			if(clock > 1000) {
-				printf("%fMhz\n",cycle_count/(clock/1000.0)/1000000.0);
+				char title[100];
+				sprintf(title, "GBM | %fMhz\n",cycle_count/(clock/1000.0)/1000000.0);
+				io.set_title(title);
 				clock = 0;
 				cycle_count = 0;
 			}

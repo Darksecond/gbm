@@ -49,3 +49,7 @@ void IO::clear(const RGB& c) {
 	if(!ren) return;
 	memset(framebuffer, 0, 160*4*144*4*sizeof(RGBA));
 }
+
+void IO::set_title(const char* title) {
+	SDL_SetWindowTitle(win, title);
+}
