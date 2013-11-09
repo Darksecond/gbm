@@ -93,6 +93,10 @@ uint8_t GB::GPU::read8(uint16_t addr) {
 		return current_line;
 	} else if(addr == 0xFF45) {
 		return lyc;
+	} else if(addr == 0xFF4A) {
+		return wnd_y;
+	} else if(addr == 0xFF4B) {
+		return wnd_x;
 	}
 
 	printf("[gpu read] [addr 0x%X]\n",addr);
@@ -116,8 +120,14 @@ void GB::GPU::write8(uint16_t addr, uint8_t value) {
 		y_scrl = value;
 	} else if(addr == 0xFF43) {
 		x_scrl = value;
+	} else if(addr == 0xFF44) {
+		current_line = 0;
 	} else if(addr == 0xFF45) {
 		lyc = value;
+	} else if(addr == 0xFF4A) {
+		wnd_y = value;
+	} else if(addr == 0xFF4B) {
+		wnd_x = value;
 	}
 
 	//TODO more registers

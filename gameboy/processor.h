@@ -285,6 +285,75 @@ namespace GB {
 			return a;
 		}
 
+		inline uint8_t rlc(uint8_t a) {
+			regs.F.C = (a & 0x80) >> 7;
+			a = (a << 1) + regs.F.C;
+			if(a == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			regs.F.H = 0;
+			return a;
+		}
+
+		inline uint8_t adc(uint8_t a, uint8_t b) {
+			uint8_t tmp = a + regs.F.C;
+			uint8_t tmp2 = tmp + b;
+			regs.F.H = 0;
+			regs.F.C = 0;
+
+			if(0x0F - (a & 0x0F) < (regs.F.C & 0x0F))
+				regs.F.H = 1;
+			if(0xFF - a < regs.F.C)
+				regs.F.C = 1;
+
+			if(0x0F - (tmp & 0x0F) < (b & 0x0F))
+				regs.F.H = 1;
+			if(0xFF - tmp < b)
+				regs.F.C = 1;
+
+			if(tmp2 == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+			regs.F.N = 0;
+			return tmp2;
+		}
+
+		inline uint8_t set(uint8_t a, uint8_t b) {
+			return a |= (1 << b);
+		}
+
+		inline uint8_t daa(uint8_t a) {
+			unsigned int temp = a;
+			if (!regs.F.N) {
+				if (regs.F.H || ((temp & 0x0f) > 9))
+					temp += 6;
+				if (regs.F.C || (temp > 0x9f))
+					temp += 0x60;
+			} else {
+				if (regs.F.H)
+					temp = (temp - 6) & 0xff;
+				if (regs.F.C)
+					temp -= 0x60;
+			}
+
+			if (temp & 0x100)
+				regs.F.C = 1;
+
+			regs.F.H = 0;
+
+			temp &= 0xff;
+
+			if (temp == 0)
+				regs.F.Z = 1;
+			else
+				regs.F.Z = 0;
+
+			return temp;
+		}
+
 		void handle_interrupts();
 		void handle_interrupt(uint8_t interrupt,uint16_t vector,uint8_t IE,uint8_t IF);
 		int decode();

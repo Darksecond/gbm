@@ -18,6 +18,7 @@ namespace GB {
 		IO &io;
 		MMU &mmu;
 		int x_scrl, y_scrl;
+		uint8_t wnd_x, wnd_y;
 		int lyc;
 
 		union {

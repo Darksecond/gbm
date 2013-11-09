@@ -125,6 +125,10 @@ int GB::Processor::decode() {
 			++regs.BC;
 			cycles = 8;
 			break;
+		case 0x04: //INC B
+			regs.B = inc(regs.B);
+			cycles = 4;
+			break;
 		case 0x05: //DEC B
 			regs.B = dec(regs.B);
 			cycles = 4;
@@ -132,6 +136,11 @@ int GB::Processor::decode() {
 		case 0x06: //LD B, n
 			regs.B = mmu.read8(regs.PC++);
 			cycles = 8;
+			break;
+		case 0x07: //RLC A
+			regs.A = rlc(regs.A);
+			regs.F.Z = 0;
+			cycles = 4;
 			break;
 		case 0x09: //ADD HL, BC
 			regs.HL = ADD16(regs.HL, regs.BC);
@@ -246,6 +255,10 @@ int GB::Processor::decode() {
 			regs.H = mmu.read8(regs.PC++);
 			cycles = 8;
 			break;
+		case 0x27: //DAA
+			regs.A = daa(regs.A);
+			cycles = 4;
+			break;
 		case 0x28: //JR Z, n
 			if(regs.F.Z != 0) {
 				jr(mmu.read8(regs.PC));
@@ -267,6 +280,14 @@ int GB::Processor::decode() {
 		case 0x2C: //INC L
 			regs.L = inc(regs.L);
 			cycles = 4;
+			break;
+		case 0x2D: //DEC L
+			regs.L = dec(regs.L);
+			cycles = 4;
+			break;
+		case 0x2E: //LD L, n
+			regs.L = mmu.read8(regs.PC++);
+			cycles = 8;
 			break;
 		case 0x2F: //CPL
 			regs.A = ~regs.A;
@@ -315,6 +336,10 @@ int GB::Processor::decode() {
 				cycles = 8;
 			}
 			break;
+		case 0x3A: //LDD A, (HL)
+			regs.A = mmu.read8(regs.HL--);
+			cycles = 8;
+			break;
 		case 0x3C: //INC A
 			regs.A = inc(regs.A);
 			cycles = 4;
@@ -323,9 +348,16 @@ int GB::Processor::decode() {
 			regs.A = dec(regs.A);
 			cycles = 4;
 			break;
+		case 0x40: //LD B, B
+			cycles = 4;
+			break;
 		case 0x44: //LD B, H
 			regs.B = regs.H;
 			cycles = 4;
+			break;
+		case 0x46: //LD B, (HL)
+			regs.B = mmu.read8(regs.HL);
+			cycles = 8;
 			break;
 		case 0x47: //LD B, A
 			regs.B = regs.A;
@@ -338,6 +370,10 @@ int GB::Processor::decode() {
 		case 0x4D: //LD C, L
 			regs.C = regs.L;
 			cycles = 4;
+			break;
+		case 0x4E: //LD C, (HL)
+			regs.C = mmu.read8(regs.HL);
+			cycles = 8;
 			break;
 		case 0x4F: //LD C, A
 			regs.C = regs.A;
@@ -379,6 +415,10 @@ int GB::Processor::decode() {
 			regs.E = mmu.read8(regs.HL);
 			cycles = 8;
 			break;
+		case 0x60: //LD H, B
+			regs.H = regs.B;
+			cycles = 4;
+			break;
 		case 0x61: //LD H, C
 			regs.H = regs.C;
 			cycles = 4;
@@ -389,6 +429,10 @@ int GB::Processor::decode() {
 			break;
 		case 0x67: //LD H, A
 			regs.H = regs.A;
+			cycles = 4;
+			break;
+		case 0x69: //LD L, C
+			regs.L = regs.C;
 			cycles = 4;
 			break;
 		case 0x6B: //LD L, E
@@ -405,6 +449,14 @@ int GB::Processor::decode() {
 			break;
 		case 0x71: //LD (HL), C
 			mmu.write8(regs.HL, regs.C);
+			cycles = 8;
+			break;
+		case 0x72: //LD (HL), D
+			mmu.write8(regs.HL, regs.D);
+			cycles = 8;
+			break;
+		case 0x73: //LD (HL), E
+			mmu.write8(regs.HL, regs.E);
 			cycles = 8;
 			break;
 		case 0x76: //HALT
@@ -453,8 +505,16 @@ int GB::Processor::decode() {
 			regs.A = ADD(regs.A, regs.C);
 			cycles = 4;
 			break;
+		case 0x82: //ADD A, D
+			regs.A = ADD(regs.A, regs.D);
+			cycles = 4;
+			break;
 		case 0x83: //ADD A, E
 			regs.A = ADD(regs.A, regs.E);
+			cycles = 4;
+			break;
+		case 0x85: //ADD A, L
+			regs.A = ADD(regs.A, regs.L);
 			cycles = 4;
 			break;
 		case 0x86: //ADD A, (HL)
@@ -464,6 +524,14 @@ int GB::Processor::decode() {
 		case 0x87: //ADD A, A
 			regs.A = ADD(regs.A, regs.A);
 			cycles = 4;
+			break;
+		case 0x89: //ADC A, C
+			regs.A = adc(regs.A, regs.C);
+			cycles = 4;
+			break;
+		case 0x8E: //ADC A, (HL)
+			regs.A = adc(regs.A, mmu.read8(regs.HL));
+			cycles = 8;
 			break;
 		case 0x90: //SUB A, B
 			regs.A = sub(regs.A, regs.B);
@@ -476,6 +544,10 @@ int GB::Processor::decode() {
 		case 0x92: //SUB A, D
 			regs.A = sub(regs.A, regs.D);
 			cycles = 4;
+			break;
+		case 0x96: //SUB A, (HL)
+			regs.A = sub(regs.A, mmu.read8(regs.HL));
+			cycles = 8;
 			break;
 		case 0x97: //SUB A, A
 			regs.A = sub(regs.A, regs.A);
@@ -521,9 +593,17 @@ int GB::Processor::decode() {
 			regs.A = OR(regs.A, mmu.read8(regs.HL));
 			cycles = 8;
 			break;
+		case 0xB8: //CP B
+			sub(regs.A, regs.B);
+			cycles = 4;
+			break;
 		case 0xB9: //CP C
 			sub(regs.A, regs.C);
 			cycles = 4;
+			break;
+		case 0xBE: //CP (HL)
+			sub(regs.A, mmu.read8(regs.HL));
+			cycles = 8;
 			break;
 		case 0xC0: //RET NZ
 			if(regs.F.Z == 0) {
@@ -607,6 +687,10 @@ int GB::Processor::decode() {
 						regs.A = sla(regs.A);
 						cycles = 8;
 						break;
+					case 0x33: //SWAP E
+						regs.E = swap(regs.E);
+						cycles = 8;
+						break;
 					case 0x37: //SWAP A
 						regs.A = swap(regs.A);
 						cycles = 8;
@@ -623,33 +707,109 @@ int GB::Processor::decode() {
 						regs.A = srl(regs.A);
 						cycles = 8;
 						break;
+					case 0x40: //BIT 0, B
+						bit(regs.B, 0);
+						cycles = 8;
+						break;
+					case 0x41: //BIT 0, C
+						bit(regs.C, 0);
+						cycles = 8;
+						break;
 					case 0x47: //BIT 0, A
 						bit(regs.A, 0);
+						cycles = 8;
+						break;
+					case 0x48: //BIT 1, B
+						bit(regs.B, 1);
 						cycles = 8;
 						break;
 					case 0x4F: //BIT 1, A
 						bit(regs.A, 1);
 						cycles = 8;
 						break;
+					case 0x50: //BIT 2, B
+						bit(regs.B, 2);
+						cycles = 8;
+						break;
+					case 0x57: //BIT 2, A
+						bit(regs.A, 2);
+						cycles = 8;
+						break;
+					case 0x58: //BIT 3, B
+						bit(regs.B, 3);
+						cycles = 8;
+						break;
+					case 0x5F: //BIT 3, A
+						bit(regs.A, 3);
+						cycles = 8;
+						break;
+					case 0x60: //BIT 4, B
+						bit(regs.B, 4);
+						cycles = 8;
+						break;
+					case 0x61: //BIT 4, C
+						bit(regs.C, 4);
+						cycles = 8;
+						break;
 					case 0x67: //BIT 4, A
 						bit(regs.A, 4);
+						cycles = 8;
+						break;
+					case 0x68: //BIT 5, B
+						bit(regs.B, 5);
+						cycles = 8;
+						break;
+					case 0x69: //BIT 5, C
+						bit(regs.C, 5);
 						cycles = 8;
 						break;
 					case 0x6F: //BIT 5, A
 						bit(regs.A, 5);
 						cycles = 8;
 						break;
+					case 0x70: //BIT 6, B
+						bit(regs.B, 6);
+						cycles = 8;
+						break;
 					case 0x77: //BIT 6, A
 						bit(regs.A, 6);
 						cycles = 8;
+						break;
+					case 0x78: //BIT 7, B
+						bit(regs.B, 7);
+						cycles = 8;
+						break;
+					case 0x7E: //BIT 7, (HL)
+						bit(mmu.read8(regs.HL), 7);
+						cycles = 16;
 						break;
 					case 0x7F: //BIT 7, A
 						bit(regs.A, 7);
 						cycles = 8;
 						break;
+					case 0x86: //RES 0, (HL)
+						mmu.write8(regs.HL, res(mmu.read8(regs.HL), 0));
+						cycles = 16;
+						break;
 					case 0x87: //RES 0,A
 						regs.A = res(regs.A, 0);
 						cycles = 8;
+						break;
+					case 0x9E: //RES 3, (HL)
+						mmu.write8(regs.HL, res(mmu.read8(regs.HL), 3));
+						cycles = 16;
+						break;
+					case 0xBE: //RES 7, (HL)
+						mmu.write8(regs.HL, res(mmu.read8(regs.HL), 7));
+						cycles = 16;
+						break;
+					case 0xDE: //SET 3, (HL)
+						mmu.write8(regs.HL, set(mmu.read8(regs.HL), 3));
+						cycles = 16;
+						break;
+					case 0xFE: //SET 7, (HL)
+						mmu.write8(regs.HL, set(mmu.read8(regs.HL), 7));
+						cycles = 16;
 						break;
 					default:
 						printf("invalid opcode 0x%X%X at 0x%X\n",opcode,opcode2,regs.PC-2);
@@ -662,6 +822,14 @@ int GB::Processor::decode() {
 			call(mmu.read16(regs.PC));
 			cycles = 24;
 			break;
+		case 0xD0: //RET NC
+			if(regs.F.C == 0) {
+				ret();
+				cycles = 20;
+			} else {
+				cycles = 8;
+			}
+			break;
 		case 0xD1: //POP DE
 			regs.DE = pop();
 			cycles = 12;
@@ -673,6 +841,14 @@ int GB::Processor::decode() {
 		case 0xD6: //SUB A, n
 			regs.A = sub(regs.A, mmu.read8(regs.PC++));
 			cycles = 8;
+			break;
+		case 0xD8: //RET C
+			if(regs.F.C != 0) {
+				ret();
+				cycles = 20;
+			} else {
+				cycles = 8;
+			}
 			break;
 		case 0xD9: //RETI
 			ret();
@@ -741,6 +917,10 @@ int GB::Processor::decode() {
 		case 0xF5: //PUSH AF
 			push(regs.AF);
 			cycles = 16;
+			break;
+		case 0xF6: //OR n
+			regs.A = OR(regs.A, mmu.read8(regs.PC++));
+			cycles = 8;
 			break;
 		case 0xFA: //LD A, (nn)
 			regs.A = mmu.read8(mmu.read16(regs.PC));

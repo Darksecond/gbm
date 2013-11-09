@@ -1,8 +1,11 @@
 #include "input.h"
 #include <SDL.h>
 
+GB::Input::Input() {
+	P1 = 0xFF;
+}
+
 void GB::Input::step() {
-	P1 = 0x0F;
 }
 
 uint8_t GB::Input::read8(uint16_t addr) {
@@ -22,13 +25,13 @@ uint8_t GB::Input::read8(uint16_t addr) {
 			P1 &= ~0x08;
 	}
 	if((P1 & 0x20) == 0) { //P15
-		if(keys[SDL_SCANCODE_Z])
+		if(keys[SDL_SCANCODE_Z]) //A
 			P1 &= ~0x01;
-		if(keys[SDL_SCANCODE_X])
+		if(keys[SDL_SCANCODE_X]) //B
 			P1 &= ~0x02;
-		if(keys[SDL_SCANCODE_RETURN])
+		if(keys[SDL_SCANCODE_RETURN]) //SELECT
 			P1 &= ~0x04;
-		if(keys[SDL_SCANCODE_SPACE])
+		if(keys[SDL_SCANCODE_SPACE]) //START
 			P1 &= ~0x08;
 	}
 
