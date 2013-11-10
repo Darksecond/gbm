@@ -12,14 +12,14 @@ namespace GB {
 		uint8_t oam[160];   //Object Attribute Memory
 		RGB framebuffer[160*144];
 
-		int current_line;
+		uint8_t current_line;
 		int clock;
 		int mode;
 		IO &io;
 		MMU &mmu;
-		int x_scrl, y_scrl;
+		uint8_t x_scrl, y_scrl;
 		uint8_t wnd_x, wnd_y;
-		int lyc;
+		uint8_t lyc;
 
 		union {
 			RegBit<7> LCD_ON;
