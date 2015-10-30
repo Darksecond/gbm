@@ -3,8 +3,14 @@
 #include <cstdio>
 #include <cstring>
 
-GB::GPU::GPU(IO &io, MMU &mmu) : io(io), mmu(mmu) {
+GB::GPU::GPU(MMU &mmu) : mmu(mmu) {
 	reset();
+}
+
+bool GB::GPU::is_frame_done() {
+	bool done = frame_done;
+	frame_done = false;
+	return done;
 }
 
 void GB::GPU::reset() {
@@ -15,11 +21,10 @@ void GB::GPU::reset() {
 	current_line = 0;
 	clock = 0;
 	mode = 3;
-
-	io.clear(White);
+	frame_done = false;
 }
 
-void GB::GPU::write_fb() {
+void GB::GPU::write_fb(IO &io) {
 	for(int y=0;y<144;++y) {
 		for(int x=0;x<160;++x) {
 			for(int iy = 0; iy < 4; iy++) {
@@ -37,13 +42,11 @@ void GB::GPU::step(int cycles) {
 	switch(mode) {
 		case 0: //HBlank
 			if(clock >= 204) {
-				clock = 0;
+				clock -= 204;
 				++current_line;
 				if(current_line == 144) {
 					mode = 1;
-					io.clear(White);
-					write_fb();
-					io.flip();
+					frame_done = true;
 					mmu.write8(0xFF0F, mmu.read8(0xFF0F) | 0x01); //V-blank int
 				} else {
 					mode = 2;
@@ -52,7 +55,7 @@ void GB::GPU::step(int cycles) {
 			break;
 		case 1: //Vblank
 			if(clock >= 456) {
-				clock = 0;
+				clock -= 456;
 				++current_line;
 				if(current_line > 153) {
 					mode = 2;
@@ -62,13 +65,13 @@ void GB::GPU::step(int cycles) {
 			break;
 		case 2: //OAM Read mode, scanline active
 			if(clock >= 80) {
-				clock = 0;
+				clock -= 80;
 				mode = 3;
 			}
 			break;
 		case 3: //VRAM Read mode, scanline active. Treat end of mode 3 as end of scanline.
 			if(clock >= 172) {
-				clock = 0;
+				clock -= 172;
 				mode = 0;
 				render_line();
 			}
@@ -175,9 +178,9 @@ void GB::GPU::render_line() {
 		}
 	} else {
 		//!LCD_ON
-		if(clock >= 60000) {
-			write_fb();
-			clock -= 60000;
+		if(clock >= 70224) {
+			frame_done = true;
+			clock -= 70224;
 		}
 		memset(framebuffer, 255, 160*144*sizeof(RGB));
 		current_line = 0;

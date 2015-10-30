@@ -15,11 +15,11 @@ namespace GB {
 		uint8_t current_line;
 		int clock;
 		int mode;
-		IO &io;
 		MMU &mmu;
 		uint8_t x_scrl, y_scrl;
 		uint8_t wnd_x, wnd_y;
 		uint8_t lyc;
+		bool frame_done;
 
 		union {
 			RegBit<7> LCD_ON;
@@ -34,13 +34,15 @@ namespace GB {
 		};
 
 		void render_line();
-		void write_fb();
 	public:
-		GPU(IO &io, MMU &mmu);
+		void write_fb(IO &io);
+		GPU(MMU &mmu);
 
 		void reset();
 		void step(int cycles);
 		uint8_t read8(uint16_t addr);
 		void write8(uint16_t addr, uint8_t value);
+
+		bool is_frame_done();
 	};
 }

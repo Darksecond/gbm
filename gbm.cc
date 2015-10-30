@@ -9,9 +9,6 @@
 #include <cstdint>
 #include <cassert>
 
-//TODO Make a BusDevice and Bus
-//     With read8,write8,read16,write16
-//     And register_{addr,range}
 namespace GB {
 
 	struct System {
@@ -25,7 +22,7 @@ namespace GB {
 		uint32_t cycle_count;
 		uint32_t clock;
 	public:
-		System(IO &io) : io(io), gpu(io,mmu), mmu(cart,gpu,input), proc(mmu) {
+		System(IO &io) : io(io), gpu(mmu), mmu(cart,gpu,input), proc(mmu) {
 			prev = SDL_GetTicks();
 		}
 
@@ -39,13 +36,17 @@ namespace GB {
 			}
 
 			int cycles = 0;
-			for(int i=0;i<4000;++i) {
+			while(!gpu.is_frame_done()) {
 				input.step();
 				int icycles = proc.step();
 				gpu.step(icycles);
 				cycles += icycles;
 				if(icycles == 0) return 0;
 			}
+			
+			io.clear(White);
+			gpu.write_fb(io);
+			io.flip();
 
 			uint32_t current = SDL_GetTicks();
 			uint32_t delta = current - prev;
