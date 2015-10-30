@@ -715,6 +715,10 @@ int GB::Processor::decode() {
 						bit(regs.C, 0);
 						cycles = 8;
 						break;
+					case 0x46: //BIT 0, (HL)
+						bit(mmu.read8(regs.HL), 0);
+						cycles = 16;
+						break;
 					case 0x47: //BIT 0, A
 						bit(regs.A, 0);
 						cycles = 8;
@@ -767,6 +771,10 @@ int GB::Processor::decode() {
 						bit(regs.A, 5);
 						cycles = 8;
 						break;
+					case 0x71: //BIT 6, C
+						bit(regs.C, 6);
+						cycles = 8;
+						break;
 					case 0x70: //BIT 6, B
 						bit(regs.B, 6);
 						cycles = 8;
@@ -777,6 +785,10 @@ int GB::Processor::decode() {
 						break;
 					case 0x78: //BIT 7, B
 						bit(regs.B, 7);
+						cycles = 8;
+						break;
+					case 0x79: //BIT 7, C
+						bit(regs.C, 7);
 						cycles = 8;
 						break;
 					case 0x7E: //BIT 7, (HL)
@@ -803,10 +815,16 @@ int GB::Processor::decode() {
 						mmu.write8(regs.HL, res(mmu.read8(regs.HL), 7));
 						cycles = 16;
 						break;
+					case 0xD8: //SET 3, B
+						set(regs.B, 3);
+						cycles = 8;
 					case 0xDE: //SET 3, (HL)
 						mmu.write8(regs.HL, set(mmu.read8(regs.HL), 3));
 						cycles = 16;
 						break;
+					case 0xF8: //SET 7, B
+						set(regs.B, 7);
+						cycles = 8;
 					case 0xFE: //SET 7, (HL)
 						mmu.write8(regs.HL, set(mmu.read8(regs.HL), 7));
 						cycles = 16;

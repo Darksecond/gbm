@@ -82,7 +82,8 @@ int main(int argc, char* argv[]) {
 	//system.cart.load("../pkmn_gold.gbc"); //ROM+MBC3+TIMER+RAM+BATT
 	//system.cart.load("../zelda_dx.gbc"); //ROM+MBC5+RAM+BATT
 	//system.cart.load("../ff_legend.gb"); //ROM+MBC2+BATT
-	system.cart.load("../opus5.gb");
+	//system.cart.load("../opus5.gb");
+	system.cart.load(argv[1]);
 	
 	bool running = true;
 	while(running) {
